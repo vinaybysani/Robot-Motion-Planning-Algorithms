@@ -1,5 +1,6 @@
-import ast, math, operator
+import ast, operator
 import matplotlib.pyplot as plt
+from utils import *
 
 class configuration_space:
     def __init__(self, FILE_NAME):
@@ -76,35 +77,6 @@ class VerticalCellDecomposition:
     def __init__(self, cspace):
         self.cspace = cspace
 
-    def line_intersection(self, line1, line2):
-        xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
-        ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])  # Typo was here
-
-        def det(a, b):
-            return a[0] * b[1] - a[1] * b[0]
-
-        # distance between point1, point2
-        def distance(p1, p2):
-            return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
-
-        div = det(xdiff, ydiff)
-        if div == 0:
-            raise Exception('lines do not intersect')
-
-        d = (det(*line1), det(*line2))
-        x = det(d, xdiff) / div
-        y = det(d, ydiff) / div
-        poi = [x, y]
-
-        # check if point falls between two points in line
-        for l in [line1, line2]:
-            p1 = l[0]
-            p2 = l[1]
-
-            if (abs((distance(p1, p2) - (distance(p1, poi) + distance(poi, p2)))) > 0.1):
-                return None
-        return x, y
-
     def construct_cells(self):
         polygon_points = [item for sublist in self.cspace.polygons for item in sublist]
         polygon_points.sort(key=lambda tup: tup[0])
@@ -127,35 +99,10 @@ class VerticalCellDecomposition:
                 else:
                     cspace.edges.append([polygon[i], polygon[0]])
 
-    def check_point_lies_on_polygon(self,x,y,polygon):
-        vertices = []
-        for vertex in polygon:
-            vertices.append(vertex)
-
-        edges = []
-        for i in range(0, len(vertices)):
-            # Edges
-            if (i != len(vertices) - 1):
-                edges.append([vertices[i], vertices[i + 1]])
-            else:
-                edges.append([vertices[i], vertices[0]])
-
-        # distance between point1, point2
-        def distance(p1, p2):
-            return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
-
-        poi = [x,y]
-        for edge in edges:
-            p1 = edge[0]
-            p2 = edge[1]
-            if (abs((distance(p1, p2) - (distance(p1, poi) + distance(poi, p2)))) < 0.1):
-                return True
-        return False
-
     def decomposition_lines(self,vertex,verticalLine,poiList,top):
         for edge in cspace.edges:
             if (vertex not in edge):  # exclude edges containing the self vertex
-                poi = self.line_intersection(verticalLine, edge)
+                poi = line_intersection(verticalLine, edge)
                 if (poi is not None):
                     poiList.append(poi)
         # print("v-", vertex, "poi-", poiList)
@@ -174,7 +121,7 @@ class VerticalCellDecomposition:
         # Check if "nearest poi" falls on same polygon => ignore the vertical line
         for polygon in cspace.polygons:
             if (vertex in polygon):
-                if (self.check_point_lies_on_polygon(nearestPoi[0], nearestPoi[1],
+                if (on_polygon(nearestPoi[0], nearestPoi[1],
                                                      polygon)):  # returs true if "nearest poi" is on same polygon
                     # print("Not possible")
                     decomp_line = False
@@ -217,17 +164,16 @@ if __name__ == "__main__":
     # print(cspace.start_state)
     # print(cspace.boundary)
     vcd = VerticalCellDecomposition(cspace)
-    vcd.generate_edges_vertices()
-    vcd.vertical_lines()
-    vcd.decomposition_line_mid_point()
-    # vcd.region_disection()
-    # vcd.sort_points_base d_on_x()
+    # vcd.generate_edges_vertices()
+    # vcd.vertical_lines()
+    # vcd.decomposition_line_mid_point()
+    # # vcd.region_disection()
+    # # vcd.sort_points_base d_on_x()
 
 
 
-    cspace.vcd_plot()
+    # cspace.vcd_plot()
     # vcd.construct_cells()
-    # vcd.line_intersection([(33,40)(67,55)],[(33,40)(33,200)])
 
 
-    # vcd.check_point_lies_on_polygon(01, 0.1,[[0,0],[1,0],[1,1],[0,1]])
+    # vcd.
