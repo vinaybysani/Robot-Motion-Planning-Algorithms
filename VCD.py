@@ -1,11 +1,6 @@
 import ast, math, operator
 import matplotlib.pyplot as plt
 
-# Refs
-# http://paulbourke.net/geometry/polygonmesh/
-# Implementation : https://www.cs.cmu.edu/~motionplanning/lecture/Chap6-CellDecomp_howie.pdf
-
-
 class configuration_space:
     def __init__(self, FILE_NAME):
         self.polygons = []
