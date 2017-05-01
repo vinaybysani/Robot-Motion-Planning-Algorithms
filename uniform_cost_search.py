@@ -1,67 +1,62 @@
+from collections import defaultdict
 from priority_queue import priority_queue
 
 class Search:
-	def __init__(self,nodes,edges,weights):
-		self.nodes = nodes
-		self.g = [float("inf")]*len(nodes)
-		self.parents = [[]]*len(nodes)
-		self.edges = edges
-		self.weights = weights
+    def __init__(self,roadmap):
+        self.roadmap = roadmap
+        self.g = {}
+        self.parents = {}
+        for key in self.roadmap.vertices_dict.keys():
+            self.g[key] = float("inf")
+            self.parents[key] = -1
 
-	def get_successors(self,x,y):
-		node = [x,y]
-		idx = self.nodes.index(node)
-		return self.edges[idx]
+    def perform_search(self):
+        self.g[0] = 0 # Since 0 is the start state
+        closed_list = []
+        pq = priority_queue()
+        pq.insert(self.roadmap.vertices_dict[0][0],self.roadmap.vertices_dict[0][1],self.g[0],0)
 
-	def get_final_path(self):
-		final_path = [self.nodes[1]]
-		while True:
-			idx = self.nodes.index(final_path[-1])
-			previous_node = self.parents[idx]
-			if previous_node == self.nodes[0]:
-				final_path.append(previous_node)
-				break
-			final_path.append(previous_node)
-		return final_path
+        while not pq.isEmpty():
+            temp = pq.pop()
 
-	def perform_search(self):
-		self.g[0] = 0 # Since 0 is the start state
-		closed_list = []
-		pq = priority_queue()
-		pq.insert(self.nodes[0][0],self.nodes[0][1],self.g[0])
+            if [temp.x,temp.y] == self.roadmap.vertices_dict[1]:
+                print "Goal state reached!"
+                final_path = list(reversed(self.get_final_path()))
+                return final_path, self.g[1]
 
-		while not pq.isEmpty():
-			temp = pq.pop()
+            closed_list.append([temp.x,temp.y])
 
-			if [temp.x,temp.y] == self.nodes[1]:
-				print "Goal state reached!"
-				final_path = list(reversed(self.get_final_path()))
-				return final_path, self.g[1]
+            successors = self.roadmap.adjacency_dict[temp.idx]
+        
+            for node_idx in successors:
+                if self.roadmap.vertices_dict[node_idx] not in closed_list:
+                    xTemp = self.roadmap.vertices_dict[node_idx][0]
+                    yTemp = self.roadmap.vertices_dict[node_idx][1]
 
-			closed_list.append([temp.x,temp.y])
+                    heapIndex = pq.elementInHeap(xTemp,yTemp)
 
-			temp_index = self.nodes.index([temp.x,temp.y])
+                    distance_index = self.roadmap.adjacency_dict[temp.idx].index(node_idx)
 
-			successors = self.get_successors(temp.x,temp.y)
+                    gTemp = self.g[temp.idx] + self.roadmap.edge_weights[temp.idx][distance_index] 
+                    if gTemp < self.g[node_idx]:
+                        self.parents[node_idx] = temp.idx
+                        self.g[node_idx] = gTemp
 
-			for node in successors:
-				if node not in closed_list:
-					xTemp = node[0]
-					yTemp = node[1]
+                    if heapIndex != -1:
+                        pq.remove(heapIndex)
 
-					heapIndex = pq.elementInHeap(xTemp,yTemp)
+                    pq.insert(xTemp, yTemp,self.g[node_idx],node_idx)
 
-					element_index = self.nodes.index([xTemp,yTemp])
-
-					distance_index = self.edges[temp_index].index([xTemp,yTemp])
-
-					gTemp = self.g[temp_index] + self.weights[temp_index][distance_index]
-
-					if gTemp < self.g[element_index]:
-						self.parents[element_index] = self.nodes[temp_index]
-						self.g[element_index] = gTemp
-
-					if heapIndex != -1:
-						pq.remove(heapIndex)
-
-					pq.insert(xTemp, yTemp,self.g[element_index])
+    def get_final_path(self):
+        final_path = [self.roadmap.vertices_dict[1]]
+        final_path_idx = [1]
+        while True:
+            idx = final_path_idx[-1]
+            previous_node = self.parents[idx]
+            if previous_node == 0:
+                final_path.append(self.roadmap.vertices_dict[previous_node])
+                final_path_idx.append(previous_node)
+                break
+            final_path.append(self.roadmap.vertices_dict[previous_node])
+            final_path_idx.append(previous_node)
+        return final_path

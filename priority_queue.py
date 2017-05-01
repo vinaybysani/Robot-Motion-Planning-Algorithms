@@ -1,8 +1,9 @@
 class State:
-  def __init__(self,x,y,cost):
+  def __init__(self,x,y,cost,idx):
     self.cost = cost
     self.x = x
     self.y = y
+    self.idx = idx
 
 class priority_queue:
   def __init__(self):
@@ -40,8 +41,8 @@ class priority_queue:
     else:
       self.minheapify_ins(index)
 
-  def insert(self,x,y,cost):
-    temp = State(x,y,cost)
+  def insert(self,x,y,cost,idx):
+    temp = State(x,y,cost,idx)
     self.heap.append(temp)
     self.minheapify_ins(len(self.heap)-1)
 
@@ -89,6 +90,7 @@ class priority_queue:
   def displayHeap(self):
     for item in self.heap:
       print "("+str(item.x)+","+str(item.y)+") Cost: "+str(item.cost)
+
 
 if __name__ == "__main__":
   array = [42,23,16,15,4,8]
