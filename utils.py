@@ -8,7 +8,7 @@ def distance(pt1,pt2):
 	'''Returns distance between two points.'''
 	return ((pt1[0]-pt2[0])**2+(pt1[1]-pt2[1])**2)**0.5
 
-def line_intersection(self, line1, line2):
+def line_intersection(line1, line2):
 	'''Returns the point of intersection of two lines.'''
 	xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
 	ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])  # Typo was here

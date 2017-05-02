@@ -46,4 +46,5 @@ class Roadmap:
 
 if __name__ == "__main__":
 	cspace = configuration_space("input.txt")
-	cspace.plot_config_space()
+	print cspace.boundary
+	# cspace.plot_config_space()
