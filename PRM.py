@@ -46,14 +46,18 @@ class PRM:
             sorted_distances = sorted(distances[i])[1:k+1]
             self.roadmap.adjacency_dict[i] = [distances[i].index(item) for item in sorted_distances]
             self.roadmap.edge_weights[i] = sorted_distances
+
+        return True
             
     def search(self):
         ucs = Search(self.roadmap)
-        final_path, path_cost = ucs.perform_search()
+        searchResult = ucs.perform_search()
 
-        if final_path is None:
+        if searchResult is None:
         	print "Path could not be found!"
         	sys.exit()
+
+        final_path, path_cost = searchResult
 
         print "Euclidean distance between start and goal: ",distance(self.roadmap.vertices_dict[0],self.roadmap.vertices_dict[1])
         print "Path cost found by PRM: ",path_cost
@@ -69,5 +73,7 @@ if __name__ == "__main__":
 	# cspace.plot_config_space()
 	prm = PRM(cspace,1000)
 	prm.perform_sampling(False)
-	prm.get_knn()
+	roadmap_success = False
+	while not roadmap_success:
+		roadmap_success = prm.get_knn()
 	prm.search()

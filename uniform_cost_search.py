@@ -47,6 +47,8 @@ class Search:
 
                     pq.insert(xTemp, yTemp,self.g[node_idx],node_idx)
 
+        return None
+
     def get_final_path(self):
         final_path = [self.roadmap.vertices_dict[1]]
         final_path_idx = [1]
