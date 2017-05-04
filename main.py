@@ -24,14 +24,14 @@ def write_to_file(planner,path_idx,fname):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument("-in",help="input file",default="input.txt")
-	parser.add_argument("-algo",help="algorithm to implement: vcd, prm, rrt, [sprm]",default="prm")
-	parser.add_argument("-out",help="output file",default="output.txt")
+	parser.add_argument("-in",help="input file (default: input.txt)",default="input.txt")
+	parser.add_argument("-algo",help="algorithm to implement: vcd, prm, rrt, [sprm] (default: prm)",default="prm")
+	parser.add_argument("-out",help="output file (default: output.txt)",default="output.txt")
 
 	# Optional arguments, only for PRM/RRT
-	parser.add_argument("-n",help="number of samples for PRM/RRT",default=1000)
-	parser.add_argument("-k",help="number of nearest neighbors for PRM",default=5)
-	parser.add_argument("-plot",help="plot final output? [y/n]",default='y')
+	parser.add_argument("-n",help="number of samples for PRM/RRT (default: 1000)",default=1000)
+	parser.add_argument("-k",help="number of nearest neighbors for PRM (default: 5)",default=5)
+	parser.add_argument("-plot",help="plot final output? [y/n] (default: y)",default='y')
 
 	args = vars(parser.parse_args())
 
