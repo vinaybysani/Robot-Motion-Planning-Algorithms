@@ -4,13 +4,17 @@ from collections import defaultdict
 from uniform_cost_search import Search
 import random
 import matplotlib.pyplot as plt 
-import sys
 
 class PRM:
     def __init__(self,cspace,num_samples):
         self.cspace = cspace
         self.num_samples = num_samples
         self.roadmap = Roadmap()
+
+        self.polygon_edges = []
+        for polygon in cspace.polygons:
+            for i in range(len(polygon)):
+                self.polygon_edges.append([polygon[i%len(polygon)],polygon[(i+1)%len(polygon)]])
 
     def perform_sampling(self,showPlot=True):
         self.roadmap.vertices_dict[0] = list(cspace.start_state)
@@ -44,10 +48,17 @@ class PRM:
         
         for i in range(len(self.roadmap.vertices_dict.keys())):
             sorted_distances = sorted(distances[i])[1:k+1]
-            self.roadmap.adjacency_dict[i] = [distances[i].index(item) for item in sorted_distances]
-            self.roadmap.edge_weights[i] = sorted_distances
-
-        return True
+            dist_indices = [distances[i].index(item) for item in sorted_distances]
+            for j,idx in enumerate(dist_indices):
+                add_edge = True
+                for edge in self.polygon_edges:
+                    if line_intersection(edge,[self.roadmap.vertices_dict[i],self.roadmap.vertices_dict[idx]]) is not None:
+                        add_edge = False
+                        break
+                if add_edge:
+                    self.roadmap.adjacency_dict[i].append(idx)
+                    # self.roadmap.adjacency_dict[].append(i)
+                    self.roadmap.edge_weights[i].append(sorted_distances[j])
             
     def search(self):
         ucs = Search(self.roadmap)
@@ -59,9 +70,6 @@ class PRM:
 
         final_path, path_cost = searchResult
 
-        print "Euclidean distance between start and goal: ",distance(self.roadmap.vertices_dict[0],self.roadmap.vertices_dict[1])
-        print "Path cost found by PRM: ",path_cost
-
         for i in range(1,len(final_path)):
             plt.plot([elem[0] for elem in final_path[i-1:i+1]],[elem[1] for elem in final_path[i-1:i+1]],color='brown')
 
@@ -69,11 +77,11 @@ class PRM:
 
 
 if __name__ == "__main__":
-	cspace = configuration_space("input.txt")
-	# cspace.plot_config_space()
-	prm = PRM(cspace,1000)
-	prm.perform_sampling(False)
-	roadmap_success = False
-	while not roadmap_success:
-		roadmap_success = prm.get_knn()
-	prm.search()
+    cspace = configuration_space("input.txt")
+    cspace.plot_config_space()
+    prm = PRM(cspace,1000)
+    prm.perform_sampling(True)
+    # prm.get_knn(10)
+    # print prm.roadmap.vertices_dict
+    # print prm.roadmap.adjacency_dict
+    # prm.search()

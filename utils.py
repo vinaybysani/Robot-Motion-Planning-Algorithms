@@ -18,7 +18,7 @@ def line_intersection(line1, line2):
 
 	div = det(xdiff, ydiff)
 	if div == 0:
-		raise Exception('lines do not intersect')
+		return None
 
 	d = (det(*line1), det(*line2))
 	x = det(d, xdiff) / div
@@ -62,3 +62,6 @@ def inside_polygon(x,y,polygon):
 		p1x,p1y = p2x,p2y
 
 	return inside
+
+if __name__ == "__main__":
+	print line_intersection([[1,0],[0,1]],[[2,0],[0,2]])

@@ -20,7 +20,6 @@ class Search:
             temp = pq.pop()
 
             if [temp.x,temp.y] == self.roadmap.vertices_dict[1]:
-                print "Goal state reached!"
                 final_path = list(reversed(self.get_final_path()))
                 return final_path, self.g[1]
 
