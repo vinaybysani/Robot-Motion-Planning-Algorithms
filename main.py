@@ -1,8 +1,10 @@
 import argparse
+import sys
 from utils.configuration_space import configuration_space
 from algorithms.PRM import PRM
 from algorithms.RRT import RRT
 from algorithms.VCD import VerticalCellDecomposition
+from algorithms.SPRM import ShortestPathRoadmap
 
 def write_to_file(planner,path_idx,fname):
 	last_key = planner.roadmap.vertices_dict.keys()[-1]
@@ -23,7 +25,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument("-in",help="input file",default="input.txt")
-	parser.add_argument("-algo",help="algorithm to implement: sprm, vcd, prm or rrt",default="vcd")
+	parser.add_argument("-algo",help="algorithm to implement: vcd, prm, rrt, [sprm]",default="prm")
 	parser.add_argument("-out",help="output file",default="output.txt")
 
 	# Optional arguments, only for PRM/RRT
@@ -48,7 +50,11 @@ if __name__ == "__main__":
 
 	elif args['algo'] == 'vcd':
 		planner = VerticalCellDecomposition(cspace)
-		planner.vertical_lines()
-		planner.region_disection()
+		planner.construct_graph()
+		path, path_idx = planner.search(args['plot']=='y')
 
-	# write_to_file(planner,path_idx,args['out'])
+	elif args['algo'] == 'sprm':
+		print "Not implemented yet..."
+		sys.exit()
+
+	write_to_file(planner,path_idx,args['out'])

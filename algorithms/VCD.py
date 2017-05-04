@@ -1,6 +1,5 @@
 import ast, math, operator
 import matplotlib.pyplot as plt
-import math
 
 from utils.configuration_space import Roadmap
 from collections import defaultdict
@@ -161,20 +160,13 @@ class VerticalCellDecomposition:
                 c_x += point[0]/float(len(region))
                 c_y += point[1]/float(len(region))
 
-            self.roadmap.vertices_dict[i+2] = [c_x,c_y]
+            self.roadmap.vertices_dict[i+2] = [c_x,c_y]      
 
-    def construct_cells(self):
-        self.polygon_vertices.sort(key=lambda tup: tup[0])
-        cspace.plot_config_space(showPlot=False)
-        plt.plot([self.polygon_vertices[0][0]] * 2, [self.cspace.boundary[0][1], self.cspace.boundary[2][1]], color='blue')
-        plt.plot([self.polygon_vertices[-1][0]] * 2, [self.cspace.boundary[0][1], self.cspace.boundary[2][1]], color='blue')
-        for i in range(1, len(self.polygon_vertices) - 1):
-            pass
-        plt.show()        
+    def construct_graph(self):
+        self.vertical_lines()
+        self.region_disection()
 
-    def adjacency_graph(self):
-        self.decomposition_lines_midpts = self.decomposition_lines_midpts[2:]
-
+        max_key = self.roadmap.vertices_dict.keys()[-1]
 
         for i,point in enumerate([self.cspace.start_state, self.cspace.goal_state]):
             for j,centroid in enumerate(self.roadmap.vertices_dict.values()[2:]):
@@ -191,50 +183,71 @@ class VerticalCellDecomposition:
                     continue
 
                 self.roadmap.adjacency_dict[i].append(j+2)
+                self.roadmap.adjacency_dict[j+2].append(i)
                 self.roadmap.edge_weights[i].append(distance(point,centroid))
+                self.roadmap.edge_weights[j+2].append(distance(point,centroid))
                 break
 
-        for i,centroid in enumerate(self.roadmap.vertices_dict.values()[2:]):
-            for j,point in enumerate(self.decomposition_lines_midpts):
+        for i in range(len(self.decomposition_lines_midpts)):
+            self.roadmap.vertices_dict[max_key+i+1] = self.decomposition_lines_midpts[i]
+
+        for i,centroid in enumerate(self.roadmap.vertices_dict.values()[2:max_key+1]):
+            for j,point in enumerate(self.roadmap.vertices_dict.values()[max_key+1:]):
                 skip = False
                 graph_line = [centroid, point]
-                # check if line joining centroid and point intersects with any of (edges, decomposition lines)
 
-                # check with edges
                 for edge in self.polygon_edges:
-                    if(line_intersection(graph_line, edge) is not None):
+                    if line_intersection(graph_line,edge) is not None:
+                        skip = True
+                        break
+
+                for decomposition_line in self.decomposition_lines:
+                    insersection_point = line_intersection(graph_line,decomposition_line)
+                    if insersection_point is not None and distance(insersection_point,point) != 0:
                         skip = True
                         break
 
                 if skip:
                     continue
 
-                # check with decomposition lines`
-                for decomposition_line in self.decomposition_lines:
-                    insersection_point = line_intersection(graph_line, decomposition_line)
-                    if((insersection_point is not None) and (distance(insersection_point, point) != 0)):
-                        skip = True
-                        break
-
-                if(skip):
-                    continue
-
-                if point not in self.roadmap.vertices_dict.values():
-                    self.roadmap.vertices_dict[len(self.roadmap.vertices_dict.keys())] = point
-
-                self.roadmap.adjacency_dict[i+2].append(self.roadmap.vertices_dict.values().index(point))
+                self.roadmap.adjacency_dict[i+2].append(max_key+1+j)
                 self.roadmap.edge_weights[i+2].append(distance(point,centroid))
+                self.roadmap.adjacency_dict[max_key+j+1].append(i+2)
+                self.roadmap.edge_weights[max_key+j+1].append(distance(point,centroid))
 
-if __name__ == "__main__":
-    cspace = configuration_space("input.txt")
-    vcd = VerticalCellDecomposition(cspace)
-    vcd.vertical_lines()
-    vcd.region_disection()
-    vcd.adjacency_graph()
+    def plot_vcd(self):
+        self.cspace.plot_config_space(showPlot=False)
 
-    print vcd.roadmap.vertices_dict
-    print vcd.roadmap.adjacency_dict
-    ucs = Search(vcd.roadmap)
-    sr = ucs.perform_search()
-    print sr
-    # cspace.vcd_plot()
+        for point in self.roadmap.vertices_dict.values():
+            plt.plot(point[0],point[1],marker='o',color='black')
+
+        for key in self.roadmap.adjacency_dict.keys():
+            for value in self.roadmap.adjacency_dict[key]:
+                plt.plot([self.roadmap.vertices_dict[key][0],self.roadmap.vertices_dict[value][0]],\
+                    [self.roadmap.vertices_dict[key][1],self.roadmap.vertices_dict[value][1]],color='y')
+
+        # plot decomposition lines
+        for line in self.decomposition_lines:
+            x = [line[0][0],line[1][0]]
+            y = [line[0][1],line[1][1]]
+            plt.plot(x,y,'b')
+
+    def search(self,showPlot=False):
+        ucs = Search(self.roadmap)
+        searchResult = ucs.perform_search()
+
+        if searchResult is None:
+            print "Path could not be found!"
+            sys.exit()
+
+        final_path, final_path_idx, path_cost = searchResult
+
+        self.plot_vcd()
+
+        for i in range(1,len(final_path)):
+            plt.plot([elem[0] for elem in final_path[i-1:i+1]],[elem[1] for elem in final_path[i-1:i+1]],color='brown')
+
+        if showPlot:
+            plt.show()
+
+        return final_path, final_path_idx
