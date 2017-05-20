@@ -1,10 +1,9 @@
-# CS598-HW2
 The following algorithms have been implemented:
 
 * Vertical Cell Decomposition (VCD)
 * Probabilistic Roadmap (PRM)
 * Rapidly-exploring Random Trees (RRT)
-* Shortest Path Roadmap (SPRM) (_Work in Progress_)
+* Shortest Path Roadmap (SPRM) (_Work in Progress_) (untill adjacency graph)
 
 Usage:
 ```
